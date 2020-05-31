@@ -23,7 +23,6 @@ func NewRouter(options ...Option) chi.Router {
 		middleware.RealIP,
 		webware.RequestId,
 		webware.Logger,
-		webware.Recoverer,
 	)
 	return router
 }

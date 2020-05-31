@@ -3,12 +3,12 @@ package api
 import (
 	"go.uber.org/fx"
 
-	"mix/app/api/controllers"
+	"mix/app/api/resolvers"
 )
 
 var Module = append(
 	[]fx.Option{
 		fx.Provide(NewApplication),
 	},
-	controllers.Module...,
+	resolvers.Module...,
 )
