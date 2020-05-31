@@ -46,7 +46,7 @@ func RenderError(w http.ResponseWriter, r *http.Request, err error) {
 	render.JSON(w, r, webResponse{Error: &webErr})
 }
 
-// RenderData renders JSON data reponse.
+// RenderData renders JSON data response.
 func RenderData(w http.ResponseWriter, r *http.Request, data interface{}) {
 	render.JSON(w, r, webResponse{Data: data})
 }

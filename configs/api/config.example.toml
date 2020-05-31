@@ -1,0 +1,8 @@
+# All parameters can be overwritten with environment variables, which names match
+# parameter name with "MIX_API" prefix. For example, to change "Application.Addr" use
+# MIX_API_APPLICATION_ADDR environment variable.
+
+[Application]
+Env = "production"
+Addr = ":8000"
+LogLevel = "info"

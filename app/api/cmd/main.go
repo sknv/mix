@@ -9,14 +9,14 @@ import (
 	"github.com/go-chi/chi"
 	"go.uber.org/fx"
 
-	"mix/internal/application"
-	"mix/internal/lib/config"
+	"mix/app/api"
+	"mix/app/api/config"
 	"mix/pkg/log"
 	"mix/pkg/web"
 )
 
 const (
-	defaultConfigPath = "config/config.toml"
+	defaultConfigPath = "configs/api/config.toml"
 
 	maxRequestsAllowed = 5000
 )
@@ -41,11 +41,25 @@ func main() {
 			fx.Invoke(BuildLogger),
 			fx.Invoke(Route),
 		},
-		application.Module...,
+		api.Module...,
 	)
 	app := fx.New(options...)
-
 	app.Run()
+}
+
+func BuildLogger(lc fx.Lifecycle, config *config.Config) {
+	// Build a logger
+	if err := log.Build(config.Application.LogLevel); err != nil {
+		stdlog.Fatalf("failed to build a logger: %+v", err)
+	}
+
+	// Remember to flush the logger
+	lc.Append(fx.Hook{
+		OnStop: func(context.Context) error {
+			log.Logger().Sync()
+			return nil
+		},
+	})
 }
 
 func NewRouter(lc fx.Lifecycle, config *config.Config) chi.Router {
@@ -74,22 +88,7 @@ func NewRouter(lc fx.Lifecycle, config *config.Config) chi.Router {
 	return router
 }
 
-func BuildLogger(lc fx.Lifecycle, config *config.Config) {
-	// Build a logger
-	if err := log.Build(config.Application.LogLevel); err != nil {
-		stdlog.Fatalf("failed to build a logger: %+v", err)
-	}
-
-	// Remember to flush the logger
-	lc.Append(fx.Hook{
-		OnStop: func(ctx context.Context) error {
-			log.Logger().Sync()
-			return nil
-		},
-	})
-}
-
 // Route routes and handles http requests
-func Route(app *application.Application, router chi.Router) {
+func Route(app *api.Application, router chi.Router) {
 	app.Route(router)
 }
