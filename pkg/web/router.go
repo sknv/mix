@@ -11,7 +11,7 @@ import (
 type Option func(chi.Router)
 
 // NewRouter returns a new router.
-func NewRouter(options ...Option) chi.Router {
+func NewRouter(options ...Option) *chi.Mux {
 	router := chi.NewRouter()
 
 	for _, opt := range options {
@@ -23,7 +23,6 @@ func NewRouter(options ...Option) chi.Router {
 		middleware.RealIP,
 		webware.RequestId,
 		webware.Logger,
-		webware.Recoverer,
 	)
 	return router
 }

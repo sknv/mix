@@ -1,9 +1,11 @@
-package controllers
+package service
 
 import (
 	"go.uber.org/fx"
 )
 
 var Module = []fx.Option{
-	fx.Provide(NewAccountController),
+	fx.Provide(
+		NewAccountService,
+	),
 }

@@ -5,13 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-	"go.uber.org/multierr"
 
 	"mix/pkg/config"
 )
 
 const (
-	envPrefix = "mix.api"
+	envPrefix = "mix.account"
 
 	defaultEnv      = "production"
 	defaultLogLevel = "info"
@@ -20,14 +19,10 @@ const (
 // Config is a global config.
 type Config struct {
 	Application Application
-	Account     Account
 }
 
 func (c *Config) Validate() error {
-	return multierr.Combine(
-		c.Application.Validate(),
-		c.Account.Validate(),
-	)
+	return c.Application.Validate()
 }
 
 // Application config.
@@ -46,18 +41,6 @@ func (a *Application) Validate() error {
 
 func (a *Application) IsProduction() bool {
 	return a.Env == "production"
-}
-
-// Account config.
-type Account struct {
-	Addr string
-}
-
-func (a *Account) Validate() error {
-	if a.Addr == "" {
-		return errors.New("empty address provided for account service")
-	}
-	return nil
 }
 
 // ParseConfig will parse the configuration from the environment variables and a file with the specified path.
@@ -89,6 +72,4 @@ func setDefaults() {
 	viper.SetDefault("Application.Env", defaultEnv)
 	viper.SetDefault("Application.Addr", "")
 	viper.SetDefault("Application.LogLevel", defaultLogLevel)
-
-	viper.SetDefault("Account.Addr", "")
 }

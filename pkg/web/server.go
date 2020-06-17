@@ -19,8 +19,8 @@ func Start(server *http.Server) {
 	}
 }
 
-// Shutdown stops a web server.
-func Shutdown(ctx context.Context, server *http.Server) error {
+// Stop stops a web server.
+func Stop(ctx context.Context, server *http.Server) error {
 	logger := log.Logger()
 	if err := server.Shutdown(ctx); err != nil {
 		return errors.Wrap(err, "failed to shutdown the http server")

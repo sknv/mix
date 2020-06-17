@@ -1,23 +1,31 @@
 package api
 
 import (
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 
-	"mix/app/api/controllers"
+	"mix/app/api/graphql"
+	"mix/app/api/resolvers"
 )
 
 type Application struct {
-	AccountController *controllers.AccountController
+	Resolver *resolvers.Resolver
 }
 
 func NewApplication(
-	accountController *controllers.AccountController,
+	resolver *resolvers.Resolver,
 ) *Application {
 	return &Application{
-		AccountController: accountController,
+		Resolver: resolver,
 	}
 }
 
 func (a *Application) Route(router chi.Router) {
-	router.Route("/account", a.AccountController.Route)
+	router.Get("/", playground.Handler("GraphQL Playground", "/query"))
+	router.Handle("/query", handler.NewDefaultServer(
+		graphql.NewExecutableSchema(graphql.Config{
+			Resolvers: a.Resolver,
+		}),
+	))
 }
