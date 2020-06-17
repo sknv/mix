@@ -4,12 +4,19 @@ package resolvers
 
 import (
 	"mix/app/api/graphql"
+	"mix/app/proto"
 )
 
-type Resolver struct{}
+type Resolver struct {
+	AccountClient proto.AccountClient
+}
 
-func NewResolver() *Resolver {
-	return &Resolver{}
+func NewResolver(
+	accountClient proto.AccountClient,
+) *Resolver {
+	return &Resolver{
+		AccountClient: accountClient,
+	}
 }
 
 func (r *Resolver) Mutation() graphql.MutationResolver {

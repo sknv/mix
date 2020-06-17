@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package proto;
+
+service Account {
+    rpc CreateUser(NewUser) returns (User);
+}
+
+message NewUser {
+    string username = 1;
+    string phoneOrEmail = 2;
+}
+
+message User {
+    string id = 1;
+    string username = 2;
+    string phone = 3;
+    string email = 4;
+    int64 createdAt = 5;
+}

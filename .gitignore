@@ -22,10 +22,3 @@ vendor/
 .env
 config.toml
 docker-compose.y*ml
-
-# Ignore uploaded files
-public/media
-!public/media/.keep
-
-# Ignore development environment files
-.vagrant/

@@ -4,24 +4,22 @@ import (
 	"context"
 	"flag"
 	stdlog "log"
-	"net/http"
+	"net"
 
-	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 
-	"mix/app/api"
-	"mix/app/api/config"
+	"mix/app/account"
+	"mix/app/account/config"
+	"mix/app/account/service"
 	"mix/app/proto"
 	"mix/pkg/log"
-	"mix/pkg/web"
+	"mix/pkg/rpc"
 )
 
 const (
 	defaultConfigPath = "configs/api/config.toml"
-
-	maxRequestsAllowed = 5000
 )
 
 func main() {
@@ -39,13 +37,12 @@ func main() {
 	options := append(
 		[]fx.Option{
 			fx.Provide(func() *config.Config { return cfg }),
-			fx.Provide(NewRouter),
-			fx.Provide(NewAccountClient),
+			fx.Provide(NewServer),
 
 			fx.Invoke(BuildLogger),
 			fx.Invoke(Route),
 		},
-		api.Module...,
+		account.Module...,
 	)
 	app := fx.New(options...)
 	app.Run()
@@ -66,52 +63,31 @@ func BuildLogger(lc fx.Lifecycle, config *config.Config) {
 	})
 }
 
-func NewRouter(lc fx.Lifecycle, config *config.Config) chi.Router {
-	// Create a router
-	router := web.NewRouter(
-		web.Throttle(maxRequestsAllowed),
-	)
+func NewServer(lc fx.Lifecycle, config *config.Config) *grpc.Server {
+	// Create an rpc server
+	server := rpc.NewServer()
 
-	// Create an http server
-	server := http.Server{
-		Addr:    config.Application.Addr,
-		Handler: router,
-	}
-
-	// Start and stop the http server
+	// Start and stop the rpc server
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
-			go web.Start(&server)
+			lis, err := net.Listen("tcp", config.Application.Addr) // listen on the address
+			if err != nil {
+				return errors.Wrap(err, "failed to listen")
+			}
+
+			go rpc.Start(server, lis)
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			return web.Stop(ctx, &server)
-		},
-	})
-
-	return router
-}
-
-func NewAccountClient(lc fx.Lifecycle, config *config.Config) (proto.AccountClient, error) {
-	// Dial to a service
-	accountConn, err := grpc.Dial(config.Account.Addr, grpc.WithInsecure())
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to dial to account service")
-	}
-
-	// Remember to close the connection
-	lc.Append(fx.Hook{
-		OnStop: func(context.Context) error {
-			accountConn.Close()
+			rpc.Stop(ctx, server)
 			return nil
 		},
 	})
 
-	accountClient := proto.NewAccountClient(accountConn)
-	return accountClient, nil
+	return server
 }
 
-// Route routes and handles http requests
-func Route(app *api.Application, router chi.Router) {
-	app.Route(router)
+// Route routes and handles rpc requests
+func Route(server *grpc.Server, account *service.AccountService) {
+	proto.RegisterAccountServer(server, account)
 }

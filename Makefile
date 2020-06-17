@@ -3,7 +3,7 @@ all:
 
 .PHONY: gen
 gen:
-	go generate -v ./...
+	go generate -v ./... && scripts/protoc.sh
 
 ##
 # Go modules section
@@ -20,6 +20,10 @@ prune:
 ##
 # Development
 ##
+
+.PHONY: run_account
+run_api:
+	go run app/account/cmd/main.go --config=configs/account/config.toml
 
 .PHONY: run_api
 run_api:

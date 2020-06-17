@@ -22,7 +22,8 @@ func Logger(next http.Handler) http.Handler {
 
 		next.ServeHTTP(ww, r)
 
-		log.ExtractLogger(r.Context()).With(
+		logger := log.ExtractLogger(r.Context())
+		logger.With(
 			"uri", fmt.Sprintf("%s %s%s", r.Method, r.Host, r.RequestURI),
 			"status", ww.Status(),
 			"ip", r.RemoteAddr,

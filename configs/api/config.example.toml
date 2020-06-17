@@ -6,3 +6,6 @@
 Env = "production"
 Addr = ":8000"
 LogLevel = "info"
+
+[Account]
+Addr = ":8010"
