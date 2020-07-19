@@ -4,8 +4,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
+	"mix/app/account/models"
 	"mix/app/proto"
 )
 
@@ -20,10 +23,21 @@ func NewAccountService(db *mongo.Client) *AccountService {
 }
 
 func (a *AccountService) CreateUser(ctx context.Context, input *proto.NewUser) (*proto.User, error) {
-	return &proto.User{
-		Id:        "0",
+	user := models.User{
 		Username:  input.Username,
 		Email:     input.PhoneOrEmail,
-		CreatedAt: time.Now().Unix(),
+		CreatedAt: time.Now(),
+	}
+
+	insertRes, err := a.Db.Database(models.Db).Collection(models.Users).InsertOne(ctx, user)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to insert a new user")
+	}
+
+	return &proto.User{
+		Id:        insertRes.InsertedID.(primitive.ObjectID).Hex(),
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt.Unix(),
 	}, nil
 }
