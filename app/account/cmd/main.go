@@ -7,6 +7,8 @@ import (
 	"net"
 
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/fx"
 	"google.golang.org/grpc"
 
@@ -37,6 +39,7 @@ func main() {
 	options := append(
 		[]fx.Option{
 			fx.Provide(func() *config.Config { return cfg }),
+			fx.Provide(NewMongoClient),
 			fx.Provide(NewServer),
 
 			fx.Invoke(BuildLogger),
@@ -85,6 +88,35 @@ func NewServer(lc fx.Lifecycle, config *config.Config) *grpc.Server {
 	})
 
 	return server
+}
+
+func NewMongoClient(lc fx.Lifecycle, config *config.Config) *mongo.Client {
+	client, err := mongo.NewClient(
+		options.Client().
+			ApplyURI(config.Database.URI()).
+			SetAuth(options.Credential{
+				Username: config.Database.User,
+				Password: config.Database.Password,
+			}),
+	)
+	if err != nil {
+		log.Logger().Fatalf("failed to create a db client: %+v", err)
+	}
+
+	// Remember to close the connection
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			return client.Connect(ctx)
+		},
+		OnStop: func(ctx context.Context) error {
+			if err := client.Disconnect(ctx); err != nil {
+				log.Logger().Errorf("failed to close the db: %+v", err)
+			}
+			return nil
+		},
+	})
+
+	return client
 }
 
 // Route routes and handles rpc requests

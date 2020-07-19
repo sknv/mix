@@ -10,6 +10,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.7.0
 	github.com/vektah/gqlparser/v2 v2.0.1
+	go.mongodb.org/mongo-driver v1.3.5
 	go.uber.org/fx v1.13.0
 	go.uber.org/multierr v1.5.0
 	go.uber.org/zap v1.15.0

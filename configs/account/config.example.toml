@@ -6,3 +6,9 @@
 Env = "production"
 Addr = ":8010"
 LogLevel = "info"
+
+[Database]
+Host = "127.0.0.1"
+Port = 27017
+User = "mongo"
+Password = "secret"

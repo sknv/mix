@@ -4,13 +4,19 @@ import (
 	"context"
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"mix/app/proto"
 )
 
-type AccountService struct{}
+type AccountService struct {
+	Db *mongo.Client
+}
 
-func NewAccountService() *AccountService {
-	return &AccountService{}
+func NewAccountService(db *mongo.Client) *AccountService {
+	return &AccountService{
+		Db: db,
+	}
 }
 
 func (a *AccountService) CreateUser(ctx context.Context, input *proto.NewUser) (*proto.User, error) {

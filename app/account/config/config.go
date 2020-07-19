@@ -1,10 +1,12 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"go.uber.org/multierr"
 
 	"mix/pkg/config"
 )
@@ -14,15 +16,22 @@ const (
 
 	defaultEnv      = "production"
 	defaultLogLevel = "info"
+
+	defaultDbHost = "127.0.0.1"
+	defaultDbPort = 27017
 )
 
 // Config is a global config.
 type Config struct {
 	Application Application
+	Database    Database
 }
 
 func (c *Config) Validate() error {
-	return c.Application.Validate()
+	return multierr.Combine(
+		c.Application.Validate(),
+		c.Database.Validate(),
+	)
 }
 
 // Application config.
@@ -41,6 +50,28 @@ func (a *Application) Validate() error {
 
 func (a *Application) IsProduction() bool {
 	return a.Env == "production"
+}
+
+// Database config.
+type Database struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+}
+
+func (d *Database) Validate() error {
+	if d.User == "" {
+		return errors.New("empty db username provided")
+	}
+	if d.Password == "" {
+		return errors.New("empty db password provided")
+	}
+	return nil
+}
+
+func (d *Database) URI() string {
+	return fmt.Sprintf("mongodb://%s:%d", d.Host, d.Port)
 }
 
 // ParseConfig will parse the configuration from the environment variables and a file with the specified path.
@@ -72,4 +103,7 @@ func setDefaults() {
 	viper.SetDefault("Application.Env", defaultEnv)
 	viper.SetDefault("Application.Addr", "")
 	viper.SetDefault("Application.LogLevel", defaultLogLevel)
+
+	viper.SetDefault("Database.Host", defaultDbHost)
+	viper.SetDefault("Database.Port", defaultDbPort)
 }
