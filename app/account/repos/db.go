@@ -1,4 +1,4 @@
-package models
+package repos
 
 const (
 	Db = "account"

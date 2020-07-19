@@ -6,19 +6,19 @@ import (
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 
 	"mix/app/account/models"
+	"mix/app/account/repos"
 	"mix/app/proto"
 )
 
 type AccountService struct {
-	Db *mongo.Client
+	Users *repos.UserRepo
 }
 
-func NewAccountService(db *mongo.Client) *AccountService {
+func NewAccountService(users *repos.UserRepo) *AccountService {
 	return &AccountService{
-		Db: db,
+		Users: users,
 	}
 }
 
@@ -29,9 +29,9 @@ func (a *AccountService) CreateUser(ctx context.Context, input *proto.NewUser) (
 		CreatedAt: time.Now(),
 	}
 
-	insertRes, err := a.Db.Database(models.Db).Collection(models.Users).InsertOne(ctx, user)
+	insertRes, err := a.Users.CreateUser(ctx, user)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to insert a new user")
+		return nil, errors.Wrap(err, "failed to create a new user")
 	}
 
 	return &proto.User{

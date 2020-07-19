@@ -6,10 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const (
-	Users = "users"
-)
-
 type User struct {
 	Id        primitive.ObjectID `bson:"_id,omitempty"`
 	Username  string             `bson:"username,omitempty"`
