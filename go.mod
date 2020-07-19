@@ -13,5 +13,5 @@ require (
 	go.uber.org/fx v1.13.0
 	go.uber.org/multierr v1.5.0
 	go.uber.org/zap v1.15.0
-	google.golang.org/grpc v1.29.1
+	google.golang.org/grpc v1.30.0
 )

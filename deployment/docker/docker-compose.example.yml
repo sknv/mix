@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  mongo:
+    image: mongo:4.2
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo # created in the "admin" authentication database
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodata:/data/db
+    restart: always
+
+volumes:
+  mongodata:
