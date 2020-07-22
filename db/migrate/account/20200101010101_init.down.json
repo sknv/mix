@@ -1,0 +1,8 @@
+[
+    {
+        "dropIndexes": "users",
+        "index": [
+            "uix__users__phone"
+        ]
+    }
+]

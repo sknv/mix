@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -9,6 +8,7 @@ import (
 	"go.uber.org/multierr"
 
 	"mix/pkg/config"
+	"mix/pkg/mongodb"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 // Config is a global config.
 type Config struct {
 	Application Application
-	Database    Database
+	Database    mongodb.Config
 }
 
 func (c *Config) Validate() error {
@@ -50,28 +50,6 @@ func (a *Application) Validate() error {
 
 func (a *Application) IsProduction() bool {
 	return a.Env == "production"
-}
-
-// Database config.
-type Database struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-}
-
-func (d *Database) Validate() error {
-	if d.User == "" {
-		return errors.New("empty db username provided")
-	}
-	if d.Password == "" {
-		return errors.New("empty db password provided")
-	}
-	return nil
-}
-
-func (d *Database) URI() string {
-	return fmt.Sprintf("mongodb://%s:%d", d.Host, d.Port)
 }
 
 // ParseConfig will parse the configuration from the environment variables and a file with the specified path.

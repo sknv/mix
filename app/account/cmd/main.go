@@ -17,6 +17,7 @@ import (
 	"mix/app/account/service"
 	"mix/app/proto"
 	"mix/pkg/log"
+	"mix/pkg/mongodb"
 	"mix/pkg/rpc"
 )
 
@@ -106,6 +107,10 @@ func NewMongoClient(lc fx.Lifecycle, config *config.Config) *mongo.Client {
 	// Remember to close the connection
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
+			if err := mongodb.Migrate(ctx, config.Database); err != nil {
+				return err
+			}
+
 			return client.Connect(ctx)
 		},
 		OnStop: func(ctx context.Context) error {

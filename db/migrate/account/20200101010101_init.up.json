@@ -1,0 +1,14 @@
+[
+    {
+        "createIndexes": "users",
+        "indexes": [
+            {
+                "key": {
+                    "phone": 1
+                },
+                "name": "uix__users__phone",
+                "unique": true
+            }
+        ]
+    }
+]

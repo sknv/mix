@@ -12,3 +12,6 @@ Host = "127.0.0.1"
 Port = 27017
 User = "mongo"
 Password = "secret"
+Database = "account"
+MigrationsDir = "db/migrate/account"
+MigrationsCollection = "schema_migrations"
